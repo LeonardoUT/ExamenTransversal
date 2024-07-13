@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+{% load static %}
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libros</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+  <header>
+    <!-- Inicio Navbar -->
+    <nav class = "navbar">
+      <ul>
+        <a href="{% url 'index' %}"><img src="{% static 'images/logo.jpg' %}" alt="" class="img-logo"></a>
+        {%for Nombre in Titulonav %}
+        <h2>{{Nombre.titulo}}</h2>
+        {%endfor%}
+      </ul>
+      <ul>
+        {%for Navbar in Navbars %}
+        <li>
+          <a href={{Navbar.url}}>
+            {{Navbar.enlac}}
+          </a>
+        </li>
+        {%endfor%}
+      </ul>
+    </nav>
+    <!-- fin Navbar -->
+  </header>
+
+  <!-- Formulario de búsqueda -->
+  <div class="conteiner-fluid">
+    <div class="row">
+      <div class="col-lg-6">
+        <form id="searchForm" method="post" class="mb-4">
+          {% csrf_token %}
+          <div class="form-group">
+            <h1>Buscar por Titulo de libro</h1>
+            <label for="title">Titulo de Libro</label>
+            <input type="text" class="form-control" id="title" name="title">
+          </div>
+          <button type="submit" class="btn btn-primary">Buscar</button>
+          <a href="{% url 'libros' %}" class="btn btn-secondary">Mostrar Todos</a>
+        </form>
+      </div>
+    </div>
+  </div>
+<!-- Formulario de búsqueda  fin-->
+
+
+  <table class="table table-striped mt-4">
+    <thead>
+      <th>Titulo</th>
+      <th>Año Publicacion</th>
+      <th>Descripcion</th>
+    </thead>
+
+    <tbody>
+      {% for lib in Libro %}
+      <tr>
+        <td scope="col">{{lib.titulo}}</td>
+        <td scope="col">{{lib.annioPublicacion}}</td>
+        <td scope="col"><button class="verMas" data-titulo="{{lib.titulo}}" data-año="{{lib.annioPublicacion}}"
+            data-descripcion="{{lib.descripcion}}">Ver Mas</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+  <!--Inicio Modals-->
+  <div id="modalVerDetalle" class="modal">
+    <div class="modal-content">
+      <dl>
+        <dt>Título</dt>
+        <dd class="detTitulo"></dd>
+        <br>
+        <dt>Año</dt>
+        <dd class="detAño"></dd>
+        <br>
+        <dt>Descripción</dt>
+        <dd class="detDescripcion"></dd>
+        <br>
+      </dl>
+
+    </div>
+  </div>
+  <!-- fin modals -->
+
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#searchForm').on('submit', function (event) {
+        event.preventDefault();
+        var isValid = false;
+        var formData = $(this).serializeArray();
+
+        $.each(formData, function (i, field) {
+          if (field.value !== '' && field.name !== 'csrfmiddlewaretoken') {
+            isValid = true;
+          }
+        });
+
+        if (!isValid) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Validación Erronea',
+            text: 'Por favor, ingrese un título.',
+          });
+        } else {
+          Swal.fire({
+            title: 'Confirmar búsqueda',
+            text: "¿Desea buscar con el criterio ingresado?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, buscar!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.submit();
+            }
+          });
+        }
+      });
+    });
+
+    $(document).on('click', '.verMas', function () {
+      $("#modalVerDetalle").modal('toggle')
+      $(".detTitulo").html($(this).attr('data-titulo'))
+      $(".detAño").html($(this).attr('data-año'))
+      $(".detDescripcion").html($(this).attr('data-descripcion'))
+    })
+  </script>
+</body>
+
+</html>
